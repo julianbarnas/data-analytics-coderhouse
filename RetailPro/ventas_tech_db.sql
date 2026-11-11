@@ -1,30 +1,17 @@
--- ============================================================
--- TechStore — Ventas_Tech_DB
--- Checkpoint Módulo 3: Script de Ingeniería de Datos
--- Autor: Julian Barnasthpol
--- Fecha: 2026-11-11
--- Motor: SQL Server (SSMS)
--- ============================================================
+-- Checkpoint M3 - Ventas_Tech_DB
+-- Julian Barnasthpol
+-- corrido y probado en SSMS
 
--- Creación de la base de datos (correr una sola vez)
--- CREATE DATABASE Ventas_Tech_DB;
--- GO
+-- la base la creo una sola vez a mano con CREATE DATABASE Ventas_Tech_DB;
 USE Ventas_Tech_DB;
 GO
 
--- === SECCIÓN 1: DROP ===
--- Se borran en orden inverso a las dependencias (primero la tabla
--- de hechos, al final las dimensiones sin FK) para no violar las
--- foreign keys y que el script se pueda correr las veces que quieras.
+-- borro todo en orden inverso para poder correr esto de nuevo sin que explote por las FK
 DROP TABLE IF EXISTS ventas;
 DROP TABLE IF EXISTS productos;
 DROP TABLE IF EXISTS clientes;
 DROP TABLE IF EXISTS categorias;
 GO
-
--- === SECCIÓN 2: CREATE ===
--- Primero las tablas de dimensión (no dependen de nadie),
--- al final la tabla de hechos (ventas), que depende de todas.
 
 CREATE TABLE categorias (
     id_categoria      INT PRIMARY KEY,
@@ -40,11 +27,12 @@ CREATE TABLE clientes (
     fecha_registro  DATE NOT NULL
 );
 
+-- precio en DECIMAL y no FLOAT, si no después las sumas de miles de ventas quedan con decimales raros
 CREATE TABLE productos (
     id_producto      INT PRIMARY KEY,
     nombre_producto  VARCHAR(100) NOT NULL,
     id_categoria     INT FOREIGN KEY REFERENCES categorias(id_categoria),
-    precio           DECIMAL(10,2) NOT NULL,   -- DECIMAL y no FLOAT: evita diferencias de centavos al sumar miles de ventas
+    precio           DECIMAL(10,2) NOT NULL,
     stock            INT DEFAULT 0,
     activo           BIT DEFAULT 1
 );
@@ -59,9 +47,7 @@ CREATE TABLE ventas (
 );
 GO
 
--- === SECCIÓN 3: INSERT ===
--- Mismo orden que el CREATE: primero las tablas sin dependencias,
--- al final ventas, que necesita que clientes y productos ya existan.
+-- carga de datos, mismo orden que las tablas de arriba
 
 INSERT INTO categorias (id_categoria, nombre_categoria, descripcion) VALUES
   (1, 'Computación',    'Laptops, PCs y monitores'),
@@ -97,8 +83,8 @@ INSERT INTO ventas (id_venta, id_cliente, id_producto, cantidad, precio_unitario
   (10, 5, 3, 2,  450.00, '2024-03-15');
 GO
 
--- === SECCIÓN 4: VALIDACIÓN ===
-SELECT * FROM categorias;   -- esperado: 4 filas
-SELECT * FROM clientes;     -- esperado: 5 filas
-SELECT * FROM productos;    -- esperado: 6 filas
-SELECT * FROM ventas;       -- esperado: 10 filas
+-- chequeo rápido de que entró todo bien
+SELECT * FROM categorias;   -- tiene que dar 4
+SELECT * FROM clientes;     -- 5
+SELECT * FROM productos;    -- 6
+SELECT * FROM ventas;       -- 10
